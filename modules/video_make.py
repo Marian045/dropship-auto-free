@@ -1,6 +1,6 @@
 import os, requests
-from moviepy.editor import *
-from gtts import gTTS
+from moviepy.editor import VideoFileClip, ImageClip, AudioFileClip, CompositeAudioClip, concatenate_videoclips, vfx, ColorClip
+from gTTS import gTTS
 
 PEXELS = os.environ.get("PEXELS_API_KEY","")
 PIXABAY = os.environ.get("PIXABAY_API_KEY","")
@@ -16,7 +16,7 @@ def _download(url, path):
 def pexels_clip():
     if not PEXELS:
         return None
-    r = requests.get("https://api.pexels.com/videos/search", 
+    r = requests.get("https://api.pexels.com/videos/search",
                      headers={"Authorization": PEXELS},
                      params={"query":"people portrait fashion", "per_page": 1, "orientation":"portrait"})
     r.raise_for_status()
@@ -31,7 +31,7 @@ def pexels_clip():
 def pixabay_music():
     if not PIXABAY:
         return None
-    r = requests.get("https://pixabay.com/api/music/", 
+    r = requests.get("https://pixabay.com/api/music/",
                      params={"key": PIXABAY, "q":"fashion", "per_page":3})
     r.raise_for_status()
     data = r.json()
@@ -51,7 +51,7 @@ def make_tiktok_video(title, benefits, images, price_eur, product_url):
 
     hook = f"{title} — feel it from the first touch."
     body = " / ".join(benefits[:3] or ["Soft", "Effortless", "You"])
-    cta = "Tap to shop. You deserve this."
+    cta  = "Tap to shop. You deserve this."
     script = f"{hook} {body}. Only {price_eur:.0f} euro. {cta}"
 
     tts_path = "out/voice.mp3"
@@ -73,7 +73,6 @@ def make_tiktok_video(title, benefits, images, price_eur, product_url):
             continue
 
     if not clips:
-        # fallback solid color clip 15s if no media
         clips = [ColorClip(size=(1080,1920), color=(20,20,20)).set_duration(15)]
 
     seq = concatenate_videoclips(clips, method="compose")
@@ -89,11 +88,7 @@ def make_tiktok_video(title, benefits, images, price_eur, product_url):
         audio = CompositeAudioClip([music, voice])
     else:
         audio = voice
-    video = seq.set_audio(audio)
-
-    # overlay text
-    txt = TextClip(hook, fontsize=72, font="Arial-Bold", method="caption", size=(1000,None)).set_position(("center","top")).set_duration(3)
-    video = CompositeVideoClip([video, txt]).set_duration(15)
+    video = seq.set_audio(audio).set_duration(15)
 
     safe = "".join([c if c.isalnum() or c in "-_ " else "_" for c in title])[:25].strip().replace(" ","_")
     out_path = f"out/videos/{safe}.mp4"
