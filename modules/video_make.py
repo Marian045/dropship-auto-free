@@ -1,6 +1,7 @@
 import os, requests
 from moviepy.editor import VideoFileClip, ImageClip, AudioFileClip, CompositeAudioClip, concatenate_videoclips, vfx, ColorClip
-from gTTS import gTTS
+from gtts import gTTS
+
 
 PEXELS = os.environ.get("PEXELS_API_KEY","")
 PIXABAY = os.environ.get("PIXABAY_API_KEY","")
