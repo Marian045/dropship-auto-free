@@ -26,7 +26,6 @@ def _try_api() -> List[Dict]:
     except Exception:
         return []
 
-    # Group by ad snapshot landing
     by_lp = {}
     for x in data:
         snap = x.get("ad_snapshot_url") or ""
@@ -42,7 +41,6 @@ def _try_api() -> List[Dict]:
     return out
 
 def _guess_landing_from_snapshot(snapshot_url: str) -> str:
-    # Best-effort extraction of destination from snapshot content
     try:
         html = requests.get(snapshot_url, timeout=30, headers={"User-Agent":"Mozilla/5.0"}).text
         m = re.search(r'https?://[^\s"\']+', html)
@@ -53,12 +51,7 @@ def _guess_landing_from_snapshot(snapshot_url: str) -> str:
     return snapshot_url
 
 def fetch_ads() -> List[Dict]:
-    """
-    Returns list of dicts: { landing_url, ads_count }
-    Falls back to empty if API not available.
-    """
     via_api = _try_api()
-    # Convert snapshots to best-effort landings
     out = []
     for item in via_api:
         out.append({
@@ -68,7 +61,6 @@ def fetch_ads() -> List[Dict]:
     return out
 
 def seed_urls() -> List[str]:
-    """Optional: user-provided seeds in data/seed_urls.csv"""
     path = "data/seed_urls.csv"
     urls = []
     if os.path.exists(path):
