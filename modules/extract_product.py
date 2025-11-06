@@ -15,10 +15,8 @@ def parse_product(url):
     if not any(h in text for h in CART_HINTS):
         return None
 
-    # title
     title = soup.title.get_text(strip=True) if soup.title else "New Arrival"
 
-    # price detection
     prices = re.findall(r"([€$£]?\s?\d+[.,]?\d*)\s?(eur|euro|ron|lei|usd|gbp|€|\$|£)?", text, re.I)
     price_val, currency = None, "EUR"
     if prices:
@@ -32,7 +30,6 @@ def parse_product(url):
             c = cur.upper().replace("EURO","EUR").replace("LEI","RON")
             currency = {"€":"EUR","$":"USD","£":"GBP"}.get(cur, c)
 
-    # images
     imgs = [img["src"] for img in soup.select("img[src]") if img["src"].startswith("http")]
     imgs = imgs[:6] if imgs else []
 
