@@ -1,39 +1,30 @@
-name: dropship-auto
+name: Run pipeline
+
 on:
-  schedule:
-    - cron: "7 */4 * * *"  # every 4 hours
-  workflow_dispatch: {}
+  push:
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   run:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install system deps
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg
+
+      # ⬇️ ⬇️ ADD THIS BLOCK RIGHT AFTER setup-python ⬇️ ⬇️
       - name: Install Python deps
         run: |
-          pip install -r requirements.txt
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt || true
+          pip install "Pillow<10" "moviepy>=1.0.3"
+      # ⬆️ ⬆️ this is your new step ⬆️ ⬆️
+
       - name: Run pipeline
-        env:
-          FB_GRAPH_TOKEN: ${{ secrets.FB_GRAPH_TOKEN }}
-          SHOPIFY_SHOP: ${{ secrets.SHOPIFY_SHOP }}
-          SHOPIFY_TOKEN: ${{ secrets.SHOPIFY_TOKEN }}
-          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
-          PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: |
-          python main.py
-      - name: Upload artifacts (videos & captions)
-        uses: actions/upload-artifact@v4
-        with:
-          name: assets
-          path: |
-            out/videos
-            out/captions
+        run: python your_script_name.py
